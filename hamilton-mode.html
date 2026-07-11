@@ -629,6 +629,136 @@
             font-family: 'Monaco', 'Courier New', monospace;
         }
 
+        /* ==================== DAILY STATS SCREEN ==================== */
+
+        .daily-stats-screen {
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .daily-stats-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .daily-stats-title {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--accent-green);
+            margin-bottom: 8px;
+        }
+
+        .daily-stats-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .daily-stats-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stats-summary-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-summary-label {
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .stats-summary-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--accent-green);
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .daily-stats-history {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .daily-stats-history-title {
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .daily-stats-history-item {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .daily-stats-lap-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .daily-stats-lap-num {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .daily-stats-mission {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .daily-stats-time {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-green);
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .daily-stats-action-bar {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            position: sticky;
+            bottom: 0;
+        }
+
+        .daily-stats-action-bar .button {
+            flex: 1;
+        }
+
         /* ==================== GARAGE CLOSED SCREEN ==================== */
 
         .garage-closed-screen {
@@ -933,6 +1063,10 @@
                 font-size: 24px;
             }
 
+            .daily-stats-title {
+                font-size: 24px;
+            }
+
             .garage-closed-title {
                 font-size: 36px;
             }
@@ -998,17 +1132,8 @@
                 font-size: 20px;
             }
 
-            .chequered-flag {
-                font-size: 60px;
-            }
-
-            .garage-closed-title {
-                font-size: 28px;
-            }
-
-            .modal {
-                padding: 20px;
-                margin: 16px;
+            .daily-stats-title {
+                font-size: 20px;
             }
         }
     </style>
@@ -1017,79 +1142,55 @@
     <div id="app">
         <!-- Top Bar -->
         <div class="top-bar">
-            <div class="top-bar-brand">HAMILTON MODE</div>
+            <div class="top-bar-brand">HAMILTON</div>
             <div class="top-bar-controls">
-                <button class="info-btn" id="infoBtn">ℹ️</button>
-                <button class="theme-toggle" id="themeToggle">🌙</button>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                <button class="info-btn" onclick="showInfo()">ℹ️</button>
             </div>
         </div>
 
         <!-- Home Screen -->
-        <div class="screen home-screen active" id="homeScreen">
+        <div class="screen home-screen active">
             <div class="header">
-                <h1 class="app-title">HAMILTON MODE</h1>
-                <p class="atmosphere-label" id="atmosphereLabel">MORNING CIRCUIT</p>
+                <div class="app-title">HAMILTON</div>
+                <div class="atmosphere-label">Focus Timer</div>
             </div>
 
             <div class="focus-time-section">
-                <p class="focus-label">Today's Focus Time</p>
-                <div class="timer-display" id="todayFocusTime">0:00</div>
+                <div class="focus-label">Current Focus</div>
+                <div class="timer-display" id="timerDisplay">25:00</div>
             </div>
 
             <div class="driver-status">
-                <p class="status-label">Driver Status</p>
-                <p class="status-value" id="driverStatus">READY</p>
-                <p class="lap-count" id="lapCount">0 Laps</p>
+                <div class="status-label">Driver Status</div>
+                <div class="status-value" id="statusValue">Ready</div>
+                <div class="lap-count" id="lapCount">Laps Completed: 0</div>
             </div>
 
-            <div id="remainingTimeWarning" class="remaining-time-warning" style="display: none;"></div>
-
             <div class="mission-section">
-                <label for="missionInput" class="mission-label">Mission</label>
-                <textarea
-                    id="missionInput"
-                    class="mission-input"
-                    placeholder="What is your qualifying lap?"
-                    maxlength="500"
-                ></textarea>
+                <div class="mission-label">Mission Briefing</div>
+                <textarea class="mission-input" id="missionInput" placeholder="What's your mission today?"></textarea>
             </div>
 
             <div class="controls-section">
                 <div class="time-selector">
-                    <span class="time-selector-label">Session Length</span>
+                    <div class="time-selector-label">Focus Time</div>
                     <div class="time-selector-controls">
-                        <button class="time-btn" id="decreaseTimeBtn">−</button>
-                        <div class="time-display" id="timeDisplay">20 min</div>
-                        <button class="time-btn" id="increaseTimeBtn">+</button>
+                        <button class="time-btn" onclick="decreaseTime()">−</button>
+                        <div class="time-display" id="timeDisplay">25</div>
+                        <button class="time-btn" onclick="increaseTime()">+</button>
                     </div>
                 </div>
             </div>
 
-            <div class="history-panel">
-                <p class="history-title">Today's Laps</p>
-                <div id="historyList"></div>
-                <p id="noLapsMessage" style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">No laps yet. Time to hit the track.</p>
-            </div>
-
-            <div class="stats-panel">
-                <p class="stats-title">Today's Statistics</p>
-                <div class="stat-card">
-                    <p class="stat-card-label">Best Lap</p>
-                    <p class="stat-card-value" id="bestLapStat">—</p>
-                </div>
-                <div class="stat-card">
-                    <p class="stat-card-label">Average Lap</p>
-                    <p class="stat-card-value" id="averageLapStat">—</p>
-                </div>
-                <div class="stat-card">
-                    <p class="stat-card-label">Total Time</p>
-                    <p class="stat-card-value" id="totalTimeStat">0:00</p>
-                </div>
+            <div class="layout-action-bar">
+                <button class="button button-primary" onclick="startCountdown()">Start Lap</button>
+                <button class="button button-secondary" onclick="resetDay()">Reset Day</button>
             </div>
         </div>
 
         <!-- Countdown Screen -->
-        <div class="screen countdown-screen" id="countdownScreen">
+        <div class="screen countdown-screen">
             <div class="start-lights">
                 <div class="light" id="light1"></div>
                 <div class="light" id="light2"></div>
@@ -1101,689 +1202,371 @@
         </div>
 
         <!-- Cockpit Screen -->
-        <div class="screen cockpit-screen" id="cockpitScreen">
+        <div class="screen cockpit-screen">
             <div class="cockpit-header">
-                <p class="lap-indicator" id="lapIndicator">LAP 1</p>
-                <button class="pit-stop-btn" id="pitStopBtn">Pit Stop</button>
+                <div class="lap-indicator" id="lapIndicator">LAP 1</div>
+                <button class="pit-stop-btn" onclick="handlePitStop()">PIT STOP</button>
             </div>
 
-            <div class="cockpit-mission" id="cockpitMission"></div>
+            <div class="cockpit-mission" id="cockpitMission">Loading mission...</div>
 
             <div class="cockpit-timer-section">
-                <p class="timer-label">Remaining Time</p>
-                <div class="timer-large" id="cockpitTimer">20:00</div>
+                <div class="timer-label">Time Remaining</div>
+                <div class="timer-large" id="cockpitTimer">25:00</div>
             </div>
 
             <div class="cockpit-condition">
-                <p class="condition-label">Driver Condition</p>
-                <p class="condition-value" id="driverCondition">PEAK FOCUS</p>
+                <div class="condition-label">Current Condition</div>
+                <div class="condition-value" id="conditionValue">OPTIMAL</div>
+            </div>
+
+            <div class="cockpit-action-bar">
+                <button class="button button-secondary" onclick="completeLap()">Complete Lap</button>
+                <button class="button button-danger" onclick="abandonLap()">Abandon</button>
             </div>
         </div>
 
         <!-- Pit Stop Screen -->
-        <div class="screen pit-stop-screen" id="pitStopScreen">
-            <p class="pit-stop-title">Pit Stop</p>
+        <div class="screen pit-stop-screen">
+            <div class="pit-stop-title">⚠️ PIT STOP</div>
             <div class="pit-stop-options">
-                <div class="pit-stop-option">💧 Hydrate</div>
-                <div class="pit-stop-option">🧘 Stretch</div>
-                <div class="pit-stop-option">🧠 Refocus</div>
+                <div class="pit-stop-option">Taking a break...</div>
+                <div class="pit-stop-option">Resume when ready</div>
             </div>
         </div>
 
         <!-- Finish Screen -->
-        <div class="screen finish-screen" id="finishScreen">
+        <div class="screen finish-screen">
             <div class="chequered-flag">🏁</div>
-            <p class="finish-title">Lap Complete</p>
+            <div class="finish-title">LAP COMPLETE</div>
             <div class="finish-stats">
                 <div class="stat-row">
-                    <span class="stat-label">Lap Time</span>
-                    <span class="stat-value" id="finishLapTime">20:00</span>
+                    <div class="stat-label">Mission</div>
+                    <div class="stat-value" id="finishMission">—</div>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Mission</span>
-                    <span class="stat-value" id="finishMission" style="text-align: right; max-width: 50%; word-break: break-word;">—</span>
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="finishTime">—</div>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Today's Total</span>
-                    <span class="stat-value" id="finishTodayTotal">20:00</span>
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="finishStatus">Complete</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Driver Status</span>
-                    <span class="stat-value" id="finishStatus">QUALIFYING PACE</span>
+            </div>
+            <div class="layout-action-bar">
+                <button class="button button-primary" onclick="viewDailyStats()">View Daily Stats</button>
+                <button class="button button-secondary" onclick="startNewLap()">Start New Lap</button>
+            </div>
+        </div>
+
+        <!-- Daily Stats Screen -->
+        <div class="screen daily-stats-screen">
+            <div class="daily-stats-header">
+                <div class="daily-stats-title">Daily Summary</div>
+                <div class="daily-stats-subtitle">Session Complete</div>
+            </div>
+
+            <div class="daily-stats-content">
+                <div class="stats-summary">
+                    <div class="stats-summary-card">
+                        <div class="stats-summary-label">Total Laps</div>
+                        <div class="stats-summary-value" id="dailyTotalLaps">0</div>
+                    </div>
+                    <div class="stats-summary-card">
+                        <div class="stats-summary-label">Total Time</div>
+                        <div class="stats-summary-value" id="dailyTotalTime">0:00</div>
+                    </div>
+                    <div class="stats-summary-card">
+                        <div class="stats-summary-label">Avg. Time/Lap</div>
+                        <div class="stats-summary-value" id="dailyAvgTime">0:00</div>
+                    </div>
                 </div>
+
+                <div class="daily-stats-history">
+                    <div class="daily-stats-history-title">Session History</div>
+                    <div id="dailyHistoryList"></div>
+                </div>
+            </div>
+
+            <div class="daily-stats-action-bar">
+                <button class="button button-secondary" onclick="backToHome()">Back to Home</button>
             </div>
         </div>
 
         <!-- Garage Closed Screen -->
-        <div class="screen garage-closed-screen" id="garageClosedScreen">
-            <p class="garage-closed-title">Garage Closed</p>
-            <p class="garage-closed-message">Recharge tomorrow. You've earned your rest.</p>
+        <div class="screen garage-closed-screen">
+            <div class="garage-closed-title">GARAGE CLOSED</div>
+            <div class="garage-closed-message">
+                The garage is currently closed. Check back later.
+            </div>
         </div>
     </div>
 
-    <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modalOverlay">
+    <!-- Info Modal -->
+    <div class="modal-overlay" id="infoModal">
         <div class="modal">
-            <button class="modal-close" id="modalClose">&times;</button>
-            <h2 class="modal-header">Hamilton Mode</h2>
+            <button class="modal-close" onclick="closeInfo()">×</button>
+            <div class="modal-header">About Hamilton Mode</div>
             <div class="modal-content">
-                <p><strong>The Philosophy</strong></p>
-                <p>Enjoy life normally. When it is time to work, enter Hamilton Mode. Drive one perfect lap. Return to life.</p>
-                <p style="margin-top: 16px;"><strong>The Rules</strong></p>
-                <ul style="margin-left: 16px; margin-top: 8px;">
-                    <li>One session: 15–30 minutes</li>
-                    <li>Maximum 2:30 per day</li>
-                    <li>Garage closes at 21:30</li>
-                    <li>Every lap counts</li>
-                </ul>
-                <p style="margin-top: 16px;"><strong>Drive with focus. Drive with purpose.</strong></p>
+                <strong>Hamilton Mode</strong> is a focus timer designed to help you stay productive.
+                <br><br>
+                Set your mission, choose your focus time, and complete laps of concentrated work.
+                <br><br>
+                Track your daily progress and celebrate your completed sessions.
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== STATE MANAGEMENT ====================
-
-        const state = {
+        // State Management
+        let state = {
             currentScreen: 'home',
-            theme: localStorage.getItem('hamiltonMode_theme') || 'dark',
-            currentMission: localStorage.getItem('hamiltonMode_mission') || '',
-            sessionLength: parseInt(localStorage.getItem('hamiltonMode_sessionLength')) || 20,
+            focusTime: 25,
+            currentLap: 0,
+            laps: [],
+            timerInterval: null,
+            timeRemaining: 25 * 60,
             isRunning: false,
-            isPaused: false,
-            timeRemaining: 0,
-            lapStartTime: 0,
-            totalTimeToday: parseInt(localStorage.getItem('hamiltonMode_totalTimeToday')) || 0,
-            lapHistory: JSON.parse(localStorage.getItem('hamiltonMode_lapHistory')) || [],
-            garageClosed: localStorage.getItem('hamiltonMode_garageClosed') === 'true' || false,
-            lastSessionDate: localStorage.getItem('hamiltonMode_lastSessionDate') || new Date().toDateString(),
-            viewingStatsFromGarageClosed: false,
+            mission: ''
         };
 
-        // Check if it's a new day
-        const today = new Date().toDateString();
-        if (state.lastSessionDate !== today) {
-            state.totalTimeToday = 0;
-            state.lapHistory = [];
-            state.garageClosed = false;
-            state.lastSessionDate = today;
-            saveTodayData();
-        }
-
-        // ==================== DOM ELEMENTS ====================
-
-        const app = document.getElementById('app');
-        const themeToggle = document.getElementById('themeToggle');
-        const infoBtn = document.getElementById('infoBtn');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalClose = document.getElementById('modalClose');
-
-        const homeScreen = document.getElementById('homeScreen');
-        const countdownScreen = document.getElementById('countdownScreen');
-        const cockpitScreen = document.getElementById('cockpitScreen');
-        const pitStopScreen = document.getElementById('pitStopScreen');
-        const finishScreen = document.getElementById('finishScreen');
-        const garageClosedScreen = document.getElementById('garageClosedScreen');
-
-        const missionInput = document.getElementById('missionInput');
-        const decreaseTimeBtn = document.getElementById('decreaseTimeBtn');
-        const increaseTimeBtn = document.getElementById('increaseTimeBtn');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const atmosphereLabel = document.getElementById('atmosphereLabel');
-        const todayFocusTime = document.getElementById('todayFocusTime');
-        const driverStatus = document.getElementById('driverStatus');
-        const lapCount = document.getElementById('lapCount');
-        const countdownDisplay = document.getElementById('countdownDisplay');
-        const cockpitTimer = document.getElementById('cockpitTimer');
-        const cockpitMission = document.getElementById('cockpitMission');
-        const driverCondition = document.getElementById('driverCondition');
-        const pitStopBtn = document.getElementById('pitStopBtn');
-        const lapIndicator = document.getElementById('lapIndicator');
-        const historyList = document.getElementById('historyList');
-        const noLapsMessage = document.getElementById('noLapsMessage');
-        const bestLapStat = document.getElementById('bestLapStat');
-        const averageLapStat = document.getElementById('averageLapStat');
-        const totalTimeStat = document.getElementById('totalTimeStat');
-        const remainingTimeWarning = document.getElementById('remainingTimeWarning');
-        const finishLapTime = document.getElementById('finishLapTime');
-        const finishMission = document.getElementById('finishMission');
-        const finishTodayTotal = document.getElementById('finishTodayTotal');
-        const finishStatus = document.getElementById('finishStatus');
-
-        // ==================== THEME MANAGEMENT ====================
-
-        function initTheme() {
-            if (state.theme === 'light') {
-                document.body.classList.add('light-mode');
-                themeToggle.textContent = '☀️';
-            } else {
-                document.body.classList.remove('light-mode');
-                themeToggle.textContent = '🌙';
-            }
-        }
-
-        themeToggle.addEventListener('click', () => {
-            state.theme = state.theme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('hamiltonMode_theme', state.theme);
-            initTheme();
-        });
-
-        // ==================== INFO MODAL ====================
-
-        infoBtn.addEventListener('click', () => {
-            modalOverlay.classList.add('active');
-        });
-
-        modalClose.addEventListener('click', () => {
-            modalOverlay.classList.remove('active');
-        });
-
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
-            }
-        });
-
-        // ==================== SCREEN NAVIGATION ====================
-
-        function showScreen(screenName) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            state.currentScreen = screenName;
-
-            switch (screenName) {
-                case 'home':
-                    homeScreen.classList.add('active');
-                    updateHomeScreen();
-                    break;
-                case 'countdown':
-                    countdownScreen.classList.add('active');
-                    startCountdown();
-                    break;
-                case 'cockpit':
-                    cockpitScreen.classList.add('active');
-                    break;
-                case 'pitStop':
-                    pitStopScreen.classList.add('active');
-                    break;
-                case 'finish':
-                    finishScreen.classList.add('active');
-                    break;
-                case 'garageClosed':
-                    garageClosedScreen.classList.add('active');
-                    break;
-            }
-        }
-
-        // ==================== HOME SCREEN ====================
-
-        function updateHomeScreen() {
-            updateAtmosphere();
-            updateTodayFocusTime();
-            updateDriverStatus();
-            updateLapCount();
-            updateHistory();
-            updateStatistics();
-            updateMissionInput();
-            updateTimeDisplay();
-            checkRemainingTime();
-            // Don't check garage closed if we're viewing stats from garage
-            if (!state.viewingStatsFromGarageClosed) {
-                checkGarageClosed();
-            }
-        }
-
-        function updateAtmosphere() {
-            const hour = new Date().getHours();
-            let atmosphere = 'MORNING CIRCUIT';
-            if (hour >= 12 && hour < 17) {
-                atmosphere = 'AFTERNOON CIRCUIT';
-            } else if (hour >= 17 || hour < 6) {
-                atmosphere = 'NIGHT CIRCUIT';
-            }
-            atmosphereLabel.textContent = atmosphere;
-        }
-
-        function updateTodayFocusTime() {
-            const hours = Math.floor(state.totalTimeToday / 60);
-            const minutes = state.totalTimeToday % 60;
-            todayFocusTime.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
-        }
-
-        function updateDriverStatus() {
-            let status = 'READY';
-            const totalMinutes = state.totalTimeToday;
-
-            if (totalMinutes === 0) {
-                status = 'READY';
-            } else if (totalMinutes < 20) {
-                status = 'BUILDING SPEED';
-            } else if (totalMinutes < 90) {
-                status = 'FAST';
-            } else if (totalMinutes < 150) {
-                status = 'QUALIFYING PACE';
-            } else {
-                status = 'FINAL PUSH';
-            }
-
-            driverStatus.textContent = status;
-        }
-
-        function updateLapCount() {
-            const count = state.lapHistory.length;
-            lapCount.textContent = `${count} Lap${count !== 1 ? 's' : ''}`;
-        }
-
-        function updateMissionInput() {
-            missionInput.value = state.currentMission;
-        }
-
-        function updateTimeDisplay() {
-            timeDisplay.textContent = `${state.sessionLength} min`;
-        }
-
-        function checkRemainingTime() {
-            const remaining = 150 - state.totalTimeToday;
-            if (remaining > 0 && remaining < state.sessionLength) {
-                remainingTimeWarning.style.display = 'block';
-                remainingTimeWarning.textContent = `⚠️ Only ${remaining} minutes remaining today. Session will auto-adjust.`;
-            } else {
-                remainingTimeWarning.style.display = 'none';
-            }
-        }
-
-        function checkGarageClosed() {
-            if (state.garageClosed) {
-                showScreen('garageClosed');
-            }
-        }
-
-        missionInput.addEventListener('input', (e) => {
-            state.currentMission = e.target.value;
-            localStorage.setItem('hamiltonMode_mission', state.currentMission);
-        });
-
-        decreaseTimeBtn.addEventListener('click', () => {
-            if (state.sessionLength > 15) {
-                state.sessionLength -= 1;
-                localStorage.setItem('hamiltonMode_sessionLength', state.sessionLength);
-                updateTimeDisplay();
-                checkRemainingTime();
-            }
-        });
-
-        increaseTimeBtn.addEventListener('click', () => {
-            if (state.sessionLength < 30) {
-                state.sessionLength += 1;
-                localStorage.setItem('hamiltonMode_sessionLength', state.sessionLength);
-                updateTimeDisplay();
-                checkRemainingTime();
-            }
-        });
-
-        // ==================== COUNTDOWN ====================
-
-        function startCountdown() {
-            let count = 5;
-            const lights = [
-                document.getElementById('light1'),
-                document.getElementById('light2'),
-                document.getElementById('light3'),
-                document.getElementById('light4'),
-                document.getElementById('light5'),
-            ];
-
-            const countdownInterval = setInterval(() => {
-                if (count > 0) {
-                    countdownDisplay.textContent = count;
-                    lights[5 - count].classList.add('active');
-                    count--;
-                } else if (count === 0) {
-                    countdownDisplay.innerHTML = '<div class="go-text">GO</div>';
-                    lights.forEach(light => {
-                        light.classList.remove('active');
-                        light.classList.add('go');
-                    });
-                    playSound('go');
-                    count--;
-                } else if (count === -1) {
-                    clearInterval(countdownInterval);
-                    startSession();
-                }
-            }, 1000);
-        }
-
-        // ==================== SESSION ====================
-
-        function startSession() {
-            const remaining = 150 - state.totalTimeToday;
-            let actualSessionLength = state.sessionLength;
-
-            if (remaining < state.sessionLength) {
-                actualSessionLength = remaining;
-            }
-
-            if (actualSessionLength <= 0) {
-                showScreen('garageClosed');
-                return;
-            }
-
-            state.timeRemaining = actualSessionLength * 60;
-            state.isRunning = true;
-            state.isPaused = false;
-            state.lapStartTime = Date.now();
-
-            lapIndicator.textContent = `LAP ${state.lapHistory.length + 1}`;
-            updateCockpitMission();
-            updateCockpitTimer();
-            showScreen('cockpit');
-            runSessionTimer();
-        }
-
-        let sessionTimerInterval;
-
-        function runSessionTimer() {
-            sessionTimerInterval = setInterval(() => {
-                if (!state.isPaused) {
-                    state.timeRemaining--;
-                    updateCockpitTimer();
-
-                    if (state.timeRemaining <= 0) {
-                        clearInterval(sessionTimerInterval);
-                        finishSession();
-                    }
-                }
-            }, 1000);
-        }
-
-        function updateCockpitTimer() {
+        // Timer Display Update
+        function updateTimerDisplay() {
             const minutes = Math.floor(state.timeRemaining / 60);
             const seconds = state.timeRemaining % 60;
-            const formatted = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            cockpitTimer.textContent = formatted;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            document.getElementById('timerDisplay').textContent = display;
+            document.getElementById('cockpitTimer').textContent = display;
+        }
 
-            if (state.timeRemaining <= 300 && state.timeRemaining > 60) {
-                cockpitTimer.classList.add('warning');
-                cockpitTimer.classList.remove('danger');
-            } else if (state.timeRemaining <= 60) {
-                cockpitTimer.classList.add('danger');
-                cockpitTimer.classList.remove('warning');
-            } else {
-                cockpitTimer.classList.remove('warning', 'danger');
+        // Increase/Decrease Time
+        function increaseTime() {
+            if (state.focusTime < 120) {
+                state.focusTime++;
+                state.timeRemaining = state.focusTime * 60;
+                document.getElementById('timeDisplay').textContent = state.focusTime;
+                updateTimerDisplay();
             }
-
-            updateDriverCondition();
         }
 
-        function updateCockpitMission() {
-            cockpitMission.textContent = state.currentMission || 'No mission defined';
-        }
-
-        function updateDriverCondition() {
-            let condition = 'PEAK FOCUS';
-            const progress = 1 - (state.timeRemaining / (state.sessionLength * 60));
-
-            if (progress < 0.25) {
-                condition = 'PEAK FOCUS';
-            } else if (progress < 0.5) {
-                condition = 'LOCKED IN';
-            } else if (progress < 0.75) {
-                condition = 'STEADY PACE';
-            } else if (progress < 0.9) {
-                condition = 'PUSHING';
-            } else {
-                condition = 'FINAL PUSH';
+        function decreaseTime() {
+            if (state.focusTime > 1) {
+                state.focusTime--;
+                state.timeRemaining = state.focusTime * 60;
+                document.getElementById('timeDisplay').textContent = state.focusTime;
+                updateTimerDisplay();
             }
-
-            driverCondition.textContent = condition;
         }
 
-        pitStopBtn.addEventListener('click', () => {
-            state.isPaused = true;
-            showScreen('pitStop');
-
-            setTimeout(() => {
-                state.isPaused = false;
-                showScreen('cockpit');
-            }, 3000);
-        });
-
-        // ==================== FINISH SESSION ====================
-
-        function finishSession() {
-            state.isRunning = false;
-            state.isPaused = false;
-            clearInterval(sessionTimerInterval);
-
-            const lapTimeSeconds = (state.sessionLength * 60) - state.timeRemaining;
-            const lapTimeMinutes = Math.floor(lapTimeSeconds / 60);
-            const lapTimeSecondsRemainder = lapTimeSeconds % 60;
-
-            const lapEntry = {
-                lapNumber: state.lapHistory.length + 1,
-                mission: state.currentMission,
-                time: lapTimeSeconds,
-                timestamp: new Date().toISOString(),
-            };
-
-            state.lapHistory.push(lapEntry);
-            state.totalTimeToday += lapTimeMinutes + (lapTimeSecondsRemainder > 0 ? 1 : 0);
-
-            saveTodayData();
-            playSound('finish');
-
-            finishLapTime.textContent = `${lapTimeMinutes}:${lapTimeSecondsRemainder.toString().padStart(2, '0')}`;
-            finishMission.textContent = state.currentMission || '—';
-            const totalHours = Math.floor(state.totalTimeToday / 60);
-            const totalMinutes = state.totalTimeToday % 60;
-            finishTodayTotal.textContent = `${totalHours}:${totalMinutes.toString().padStart(2, '0')}`;
-            updateDriverStatus();
-            finishStatus.textContent = driverStatus.textContent;
-
-            showScreen('finish');
-
-            // Auto return to home after 5 seconds
-            setTimeout(() => {
-                state.currentMission = '';
-                localStorage.setItem('hamiltonMode_mission', '');
-                state.viewingStatsFromGarageClosed = false;
-                showScreen('home');
-            }, 5000);
+        // Screen Navigation
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelector(`.${screenName}`).classList.add('active');
+            state.currentScreen = screenName;
         }
 
-        // ==================== HISTORY & STATISTICS ====================
-
-        function updateHistory() {
-            historyList.innerHTML = '';
-            if (state.lapHistory.length === 0) {
-                noLapsMessage.style.display = 'block';
-                return;
-            }
-
-            noLapsMessage.style.display = 'none';
-
-            const sortedLaps = [...state.lapHistory].reverse();
-            sortedLaps.forEach(lap => {
-                const lapMinutes = Math.floor(lap.time / 60);
-                const lapSeconds = lap.time % 60;
-                const timeFormatted = `${lapMinutes}:${lapSeconds.toString().padStart(2, '0')}`;
-
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                    <div class="history-item-content">
-                        <p class="history-lap-num">Lap ${lap.lapNumber}</p>
-                        <p class="history-mission">${lap.mission || 'No mission'}</p>
-                    </div>
-                    <p class="history-time">${timeFormatted}</p>
-                `;
-                historyList.appendChild(item);
-            });
+        // Start Countdown
+        function startCountdown() {
+            state.mission = document.getElementById('missionInput').value || 'No mission';
+            state.currentLap++;
+            showScreen('countdown-screen');
+            
+            let countdown = 5;
+            const countdownInterval = setInterval(() => {
+                if (countdown > 0) {
+                    document.getElementById('countdownDisplay').textContent = countdown;
+                    updateLights(5 - countdown);
+                    countdown--;
+                } else {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdownDisplay').innerHTML = '<div class="go-text">GO!</div>';
+                    setTimeout(() => startCockpit(), 1000);
+                }
+            }, 1000);
         }
 
-        function updateStatistics() {
-            if (state.lapHistory.length === 0) {
-                bestLapStat.textContent = '—';
-                averageLapStat.textContent = '—';
-                totalTimeStat.textContent = '0:00';
-                return;
-            }
-
-            const lapTimes = state.lapHistory.map(lap => lap.time);
-            const bestTime = Math.min(...lapTimes);
-            const avgTime = Math.round(lapTimes.reduce((a, b) => a + b, 0) / lapTimes.length);
-
-            const bestMinutes = Math.floor(bestTime / 60);
-            const bestSeconds = bestTime % 60;
-            bestLapStat.textContent = `${bestMinutes}:${bestSeconds.toString().padStart(2, '0')}`;
-
-            const avgMinutes = Math.floor(avgTime / 60);
-            const avgSeconds = avgTime % 60;
-            averageLapStat.textContent = `${avgMinutes}:${avgSeconds.toString().padStart(2, '0')}`;
-
-            const totalHours = Math.floor(state.totalTimeToday / 60);
-            const totalMinutes = state.totalTimeToday % 60;
-            totalTimeStat.textContent = `${totalHours}:${totalMinutes.toString().padStart(2, '0')}`;
-        }
-
-        // ==================== LOCAL STORAGE ====================
-
-        function saveTodayData() {
-            localStorage.setItem('hamiltonMode_totalTimeToday', state.totalTimeToday);
-            localStorage.setItem('hamiltonMode_lapHistory', JSON.stringify(state.lapHistory));
-            localStorage.setItem('hamiltonMode_garageClosed', state.garageClosed);
-            localStorage.setItem('hamiltonMode_lastSessionDate', state.lastSessionDate);
-        }
-
-        // ==================== GARAGE MANAGEMENT ====================
-
-        // Check if should close garage (21:30)
-        function checkGarageTime() {
-            const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            const currentTime = hour * 60 + minute;
-            const closeTime = 21 * 60 + 30;
-
-            if (currentTime >= closeTime) {
-                state.garageClosed = true;
-                saveTodayData();
-                if (state.isRunning) {
-                    clearInterval(sessionTimerInterval);
-                    showScreen('garageClosed');
+        function updateLights(active) {
+            for (let i = 1; i <= 5; i++) {
+                const light = document.getElementById(`light${i}`);
+                if (i <= active) {
+                    light.classList.add('active');
+                } else {
+                    light.classList.remove('active');
                 }
             }
         }
 
-        // Check garage time periodically
-        setInterval(checkGarageTime, 60000);
+        // Start Cockpit
+        function startCockpit() {
+            showScreen('cockpit-screen');
+            document.getElementById('lapIndicator').textContent = `LAP ${state.currentLap}`;
+            document.getElementById('cockpitMission').textContent = state.mission;
+            
+            state.timeRemaining = state.focusTime * 60;
+            state.isRunning = true;
+            updateTimerDisplay();
 
-        // ==================== SOUND ====================
+            state.timerInterval = setInterval(() => {
+                state.timeRemaining--;
+                updateTimerDisplay();
+                updateCondition();
 
-        function playSound(type) {
-            // Audio context for sound generation
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (state.timeRemaining <= 0) {
+                    clearInterval(state.timerInterval);
+                    completeLap();
+                }
+            }, 1000);
+        }
 
-            if (type === 'go') {
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-                osc.frequency.value = 800;
-                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + 0.2);
-            } else if (type === 'finish') {
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-                osc.frequency.value = 1200;
-                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + 0.3);
+        function updateCondition() {
+            const value = document.getElementById('conditionValue');
+            if (state.timeRemaining > state.focusTime * 60 * 0.5) {
+                value.textContent = 'OPTIMAL';
+                value.parentElement.style.color = 'var(--accent-green)';
+            } else if (state.timeRemaining > state.focusTime * 60 * 0.25) {
+                value.textContent = 'WARNING';
+                value.parentElement.style.color = 'var(--accent-yellow)';
+                document.getElementById('cockpitTimer').classList.add('warning');
+            } else {
+                value.textContent = 'CRITICAL';
+                value.parentElement.style.color = 'var(--accent-red)';
+                document.getElementById('cockpitTimer').classList.remove('warning');
+                document.getElementById('cockpitTimer').classList.add('danger');
             }
         }
 
-        // ==================== START SESSION BUTTON ====================
+        // Complete Lap
+        function completeLap() {
+            clearInterval(state.timerInterval);
+            state.isRunning = false;
 
-        const layoutActionBar = document.createElement('div');
-        layoutActionBar.className = 'layout-action-bar';
-        layoutActionBar.innerHTML = `
-            <button class="button button-primary" id="startSessionBtn">Start Qualifying Lap</button>
-            <button class="button button-secondary" id="endDayBtn">End Day</button>
-        `;
-        homeScreen.appendChild(layoutActionBar);
+            const lapTime = state.focusTime * 60;
+            state.laps.push({
+                lap: state.currentLap,
+                mission: state.mission,
+                time: formatTime(lapTime),
+                timestamp: new Date()
+            });
 
-        const startSessionBtn = document.getElementById('startSessionBtn');
-        const endDayBtn = document.getElementById('endDayBtn');
+            document.getElementById('finishMission').textContent = state.mission;
+            document.getElementById('finishTime').textContent = formatTime(lapTime);
+            document.getElementById('lapCount').textContent = `Laps Completed: ${state.currentLap}`;
 
-        startSessionBtn.addEventListener('click', () => {
-            if (state.garageClosed) {
-                return;
+            document.getElementById('cockpitTimer').classList.remove('warning', 'danger');
+            showScreen('finish-screen');
+        }
+
+        // Abandon Lap
+        function abandonLap() {
+            clearInterval(state.timerInterval);
+            state.isRunning = false;
+            state.currentLap--;
+            document.getElementById('missionInput').value = '';
+            showScreen('home-screen');
+        }
+
+        // Handle Pit Stop
+        function handlePitStop() {
+            clearInterval(state.timerInterval);
+            state.isRunning = false;
+            showScreen('pit-stop-screen');
+
+            setTimeout(() => {
+                state.isRunning = true;
+                showScreen('cockpit-screen');
+                state.timerInterval = setInterval(() => {
+                    state.timeRemaining--;
+                    updateTimerDisplay();
+                    updateCondition();
+
+                    if (state.timeRemaining <= 0) {
+                        clearInterval(state.timerInterval);
+                        completeLap();
+                    }
+                }, 1000);
+            }, 3000);
+        }
+
+        // View Daily Stats
+        function viewDailyStats() {
+            updateDailyStatsScreen();
+            showScreen('daily-stats-screen');
+        }
+
+        // Update Daily Stats Screen
+        function updateDailyStatsScreen() {
+            const totalLaps = state.laps.length;
+            const totalTime = state.laps.reduce((sum, lap) => {
+                const parts = lap.time.split(':');
+                return sum + (parseInt(parts[0]) * 60 + parseInt(parts[1]));
+            }, 0);
+            const avgTime = totalLaps > 0 ? Math.floor(totalTime / totalLaps) : 0;
+
+            document.getElementById('dailyTotalLaps').textContent = totalLaps;
+            document.getElementById('dailyTotalTime').textContent = formatTime(totalTime);
+            document.getElementById('dailyAvgTime').textContent = formatTime(avgTime);
+
+            const historyList = document.getElementById('dailyHistoryList');
+            historyList.innerHTML = state.laps.map(lap => `
+                <div class="daily-stats-history-item">
+                    <div class="daily-stats-lap-info">
+                        <div class="daily-stats-lap-num">LAP ${lap.lap}</div>
+                        <div class="daily-stats-mission">${lap.mission}</div>
+                    </div>
+                    <div class="daily-stats-time">${lap.time}</div>
+                </div>
+            `).join('');
+        }
+
+        // Start New Lap
+        function startNewLap() {
+            document.getElementById('missionInput').value = '';
+            showScreen('home-screen');
+        }
+
+        // Back to Home
+        function backToHome() {
+            document.getElementById('missionInput').value = '';
+            showScreen('home-screen');
+        }
+
+        // Reset Day
+        function resetDay() {
+            if (confirm('Reset all progress for today?')) {
+                state.currentLap = 0;
+                state.laps = [];
+                state.mission = '';
+                document.getElementById('missionInput').value = '';
+                document.getElementById('lapCount').textContent = 'Laps Completed: 0';
+                document.getElementById('statusValue').textContent = 'Ready';
             }
-            showScreen('countdown');
-        });
+        }
 
-        endDayBtn.addEventListener('click', () => {
-            state.garageClosed = true;
-            state.viewingStatsFromGarageClosed = false;
-            saveTodayData();
-            showScreen('garageClosed');
-        });
+        // Format Time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
 
-        // ==================== FINISH LAP BUTTON ====================
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
 
-        const cockpitActionBar = document.createElement('div');
-        cockpitActionBar.className = 'cockpit-action-bar';
-        cockpitActionBar.innerHTML = `
-            <button class="button button-primary" id="finishLapBtn">Finish Lap</button>
-        `;
-        cockpitScreen.appendChild(cockpitActionBar);
+        // Info Modal
+        function showInfo() {
+            document.getElementById('infoModal').classList.add('active');
+        }
 
-        const finishLapBtn = document.getElementById('finishLapBtn');
-        finishLapBtn.addEventListener('click', () => {
-            clearInterval(sessionTimerInterval);
-            finishSession();
-        });
+        function closeInfo() {
+            document.getElementById('infoModal').classList.remove('active');
+        }
 
-        // ==================== RETURN HOME BUTTON ====================
-
-        const finishActionBar = document.createElement('div');
-        finishActionBar.className = 'layout-action-bar';
-        finishActionBar.innerHTML = `
-            <button class="button button-primary" id="returnHomeBtn">Return to Life</button>
-        `;
-        finishScreen.appendChild(finishActionBar);
-
-        const returnHomeBtn = document.getElementById('returnHomeBtn');
-        returnHomeBtn.addEventListener('click', () => {
-            state.currentMission = '';
-            localStorage.setItem('hamiltonMode_mission', '');
-            state.viewingStatsFromGarageClosed = false;
-            showScreen('home');
-        });
-
-        // ==================== GARAGE CLOSED ACTION ====================
-
-        const garageActionBar = document.createElement('div');
-        garageActionBar.className = 'layout-action-bar';
-        garageActionBar.innerHTML = `
-            <button class="button button-secondary" id="garageViewStats">View Today's Stats</button>
-        `;
-        garageClosedScreen.appendChild(garageActionBar);
-
-        const garageViewStats = document.getElementById('garageViewStats');
-        garageViewStats.addEventListener('click', () => {
-            state.viewingStatsFromGarageClosed = true;
-            showScreen('home');
-        });
-
-        // ==================== INITIALIZATION ====================
-
-        initTheme();
-        updateHomeScreen();
+        // Initialize
+        document.getElementById('timeDisplay').textContent = state.focusTime;
+        updateTimerDisplay();
     </script>
 </body>
 </html>
