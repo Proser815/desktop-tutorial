@@ -326,12 +326,10 @@
             background: var(--bg-secondary);
             position: sticky;
             bottom: 0;
-            flex-wrap: wrap;
         }
 
         .layout-action-bar .button {
             flex: 1;
-            min-width: 120px;
         }
 
         /* ==================== COUNTDOWN SCREEN ==================== */
@@ -693,23 +691,6 @@
             flex: 1;
         }
 
-        .history-item-delete {
-            background: transparent;
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all var(--transition);
-            white-space: nowrap;
-        }
-
-        .history-item-delete:hover {
-            background: var(--accent-red);
-            color: var(--bg-primary);
-        }
-
         .history-lap-num {
             font-size: 11px;
             letter-spacing: 1px;
@@ -870,7 +851,6 @@
             max-height: 80vh;
             overflow-y: auto;
             animation: slideUp 0.4s ease-out;
-            position: relative;
         }
 
         .modal-header {
@@ -910,51 +890,6 @@
 
         .modal-close:hover {
             color: var(--accent-green);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .modal-actions .button {
-            flex: 1;
-        }
-
-        /* ==================== CONFIRMATION MODAL ==================== */
-
-        .confirmation-modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 400px;
-            animation: slideUp 0.4s ease-out;
-            text-align: center;
-        }
-
-        .confirmation-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--accent-red);
-        }
-
-        .confirmation-message {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .confirmation-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .confirmation-actions .button {
-            flex: 1;
         }
 
         /* ==================== REMAINING TIME WARNING ==================== */
@@ -1246,18 +1181,6 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal Overlay -->
-    <div class="modal-overlay" id="confirmationOverlay">
-        <div class="confirmation-modal">
-            <p class="confirmation-title" id="confirmationTitle">Confirm Action</p>
-            <p class="confirmation-message" id="confirmationMessage">Are you sure?</p>
-            <div class="confirmation-actions">
-                <button class="button button-secondary" id="confirmationCancel">Cancel</button>
-                <button class="button button-danger" id="confirmationConfirm">Confirm</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ==================== STATE MANAGEMENT ====================
 
@@ -1274,6 +1197,7 @@
             lapHistory: JSON.parse(localStorage.getItem('hamiltonMode_lapHistory')) || [],
             garageClosed: localStorage.getItem('hamiltonMode_garageClosed') === 'true' || false,
             lastSessionDate: localStorage.getItem('hamiltonMode_lastSessionDate') || new Date().toDateString(),
+            viewingStatsFromGarageClosed: false,
         };
 
         // Check if it's a new day
@@ -1293,11 +1217,6 @@
         const infoBtn = document.getElementById('infoBtn');
         const modalOverlay = document.getElementById('modalOverlay');
         const modalClose = document.getElementById('modalClose');
-        const confirmationOverlay = document.getElementById('confirmationOverlay');
-        const confirmationCancel = document.getElementById('confirmationCancel');
-        const confirmationConfirm = document.getElementById('confirmationConfirm');
-        const confirmationTitle = document.getElementById('confirmationTitle');
-        const confirmationMessage = document.getElementById('confirmationMessage');
 
         const homeScreen = document.getElementById('homeScreen');
         const countdownScreen = document.getElementById('countdownScreen');
@@ -1330,31 +1249,6 @@
         const finishMission = document.getElementById('finishMission');
         const finishTodayTotal = document.getElementById('finishTodayTotal');
         const finishStatus = document.getElementById('finishStatus');
-
-        // ==================== CONFIRMATION DIALOG ====================
-
-        let confirmationCallback = null;
-
-        function showConfirmation(title, message, onConfirm) {
-            confirmationTitle.textContent = title;
-            confirmationMessage.textContent = message;
-            confirmationCallback = onConfirm;
-            confirmationOverlay.classList.add('active');
-        }
-
-        function hideConfirmation() {
-            confirmationOverlay.classList.remove('active');
-            confirmationCallback = null;
-        }
-
-        confirmationCancel.addEventListener('click', hideConfirmation);
-
-        confirmationConfirm.addEventListener('click', () => {
-            if (confirmationCallback) {
-                confirmationCallback();
-            }
-            hideConfirmation();
-        });
 
         // ==================== THEME MANAGEMENT ====================
 
@@ -1416,7 +1310,6 @@
                     break;
                 case 'garageClosed':
                     garageClosedScreen.classList.add('active');
-                    updateHomeScreen();
                     break;
             }
         }
@@ -1433,6 +1326,10 @@
             updateMissionInput();
             updateTimeDisplay();
             checkRemainingTime();
+            // Don't check garage closed if we're viewing stats from garage
+            if (!state.viewingStatsFromGarageClosed) {
+                checkGarageClosed();
+            }
         }
 
         function updateAtmosphere() {
@@ -1491,6 +1388,12 @@
                 remainingTimeWarning.textContent = `⚠️ Only ${remaining} minutes remaining today. Session will auto-adjust.`;
             } else {
                 remainingTimeWarning.style.display = 'none';
+            }
+        }
+
+        function checkGarageClosed() {
+            if (state.garageClosed) {
+                showScreen('garageClosed');
             }
         }
 
@@ -1682,6 +1585,7 @@
             setTimeout(() => {
                 state.currentMission = '';
                 localStorage.setItem('hamiltonMode_mission', '');
+                state.viewingStatsFromGarageClosed = false;
                 showScreen('home');
             }, 5000);
         }
@@ -1710,33 +1614,10 @@
                         <p class="history-lap-num">Lap ${lap.lapNumber}</p>
                         <p class="history-mission">${lap.mission || 'No mission'}</p>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <p class="history-time">${timeFormatted}</p>
-                        <button class="history-item-delete" data-lap-number="${lap.lapNumber}">Delete</button>
-                    </div>
+                    <p class="history-time">${timeFormatted}</p>
                 `;
                 historyList.appendChild(item);
-
-                // Add delete handler
-                const deleteBtn = item.querySelector('.history-item-delete');
-                deleteBtn.addEventListener('click', () => {
-                    showConfirmation(
-                        'Delete Lap',
-                        `Delete Lap ${lap.lapNumber}? This cannot be undone.`,
-                        () => deleteLap(lap.lapNumber)
-                    );
-                });
             });
-        }
-
-        function deleteLap(lapNumber) {
-            const lapToDelete = state.lapHistory.find(lap => lap.lapNumber === lapNumber);
-            if (lapToDelete) {
-                state.totalTimeToday -= Math.ceil(lapToDelete.time / 60);
-                state.lapHistory = state.lapHistory.filter(lap => lap.lapNumber !== lapNumber);
-                saveTodayData();
-                updateHomeScreen();
-            }
         }
 
         function updateStatistics() {
@@ -1831,13 +1712,11 @@
         layoutActionBar.className = 'layout-action-bar';
         layoutActionBar.innerHTML = `
             <button class="button button-primary" id="startSessionBtn">Start Qualifying Lap</button>
-            <button class="button button-secondary" id="clearDayBtn">Clear Day</button>
             <button class="button button-secondary" id="endDayBtn">End Day</button>
         `;
         homeScreen.appendChild(layoutActionBar);
 
         const startSessionBtn = document.getElementById('startSessionBtn');
-        const clearDayBtn = document.getElementById('clearDayBtn');
         const endDayBtn = document.getElementById('endDayBtn');
 
         startSessionBtn.addEventListener('click', () => {
@@ -1847,24 +1726,9 @@
             showScreen('countdown');
         });
 
-        clearDayBtn.addEventListener('click', () => {
-            showConfirmation(
-                'Clear Day',
-                'Clear all today\'s laps and stats? This cannot be undone.',
-                () => {
-                    state.totalTimeToday = 0;
-                    state.lapHistory = [];
-                    state.currentMission = '';
-                    state.garageClosed = false;
-                    localStorage.setItem('hamiltonMode_mission', '');
-                    saveTodayData();
-                    updateHomeScreen();
-                }
-            );
-        });
-
         endDayBtn.addEventListener('click', () => {
             state.garageClosed = true;
+            state.viewingStatsFromGarageClosed = false;
             saveTodayData();
             showScreen('garageClosed');
         });
@@ -1897,6 +1761,7 @@
         returnHomeBtn.addEventListener('click', () => {
             state.currentMission = '';
             localStorage.setItem('hamiltonMode_mission', '');
+            state.viewingStatsFromGarageClosed = false;
             showScreen('home');
         });
 
@@ -1905,12 +1770,13 @@
         const garageActionBar = document.createElement('div');
         garageActionBar.className = 'layout-action-bar';
         garageActionBar.innerHTML = `
-            <button class="button button-secondary" id="garageViewStats">View Stats</button>
+            <button class="button button-secondary" id="garageViewStats">View Today's Stats</button>
         `;
         garageClosedScreen.appendChild(garageActionBar);
 
         const garageViewStats = document.getElementById('garageViewStats');
         garageViewStats.addEventListener('click', () => {
+            state.viewingStatsFromGarageClosed = true;
             showScreen('home');
         });
 
