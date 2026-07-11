@@ -713,6 +713,22 @@
             white-space: nowrap;
         }
 
+        .history-delete-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            color: var(--accent-red);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition);
+        }
+
+        .history-delete-btn:hover {
+            color: var(--accent-red);
+            opacity: 0.8;
+        }
+
         /* ==================== TOP BAR ==================== */
 
         .top-bar {
@@ -890,6 +906,22 @@
 
         .modal-close:hover {
             color: var(--accent-green);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions .button {
+            flex: 1;
+        }
+
+        /* ==================== CONFIRMATION MODAL ==================== */
+
+        .confirmation-modal-title {
+            color: var(--accent-red);
         }
 
         /* ==================== REMAINING TIME WARNING ==================== */
@@ -1165,8 +1197,8 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <button class="modal-close" id="modalClose">&times;</button>
-            <h2 class="modal-header">Hamilton Mode</h2>
-            <div class="modal-content">
+            <h2 class="modal-header" id="modalHeader">Hamilton Mode</h2>
+            <div class="modal-content" id="modalContent">
                 <p><strong>The Philosophy</strong></p>
                 <p>Enjoy life normally. When it is time to work, enter Hamilton Mode. Drive one perfect lap. Return to life.</p>
                 <p style="margin-top: 16px;"><strong>The Rules</strong></p>
@@ -1178,6 +1210,7 @@
                 </ul>
                 <p style="margin-top: 16px;"><strong>Drive with focus. Drive with purpose.</strong></p>
             </div>
+            <div class="modal-actions" id="modalActions"></div>
         </div>
     </div>
 
@@ -1197,6 +1230,7 @@
             lapHistory: JSON.parse(localStorage.getItem('hamiltonMode_lapHistory')) || [],
             garageClosed: localStorage.getItem('hamiltonMode_garageClosed') === 'true' || false,
             lastSessionDate: localStorage.getItem('hamiltonMode_lastSessionDate') || new Date().toDateString(),
+            modalMode: 'info',
         };
 
         // Check if it's a new day
@@ -1216,6 +1250,9 @@
         const infoBtn = document.getElementById('infoBtn');
         const modalOverlay = document.getElementById('modalOverlay');
         const modalClose = document.getElementById('modalClose');
+        const modalHeader = document.getElementById('modalHeader');
+        const modalContent = document.getElementById('modalContent');
+        const modalActions = document.getElementById('modalActions');
 
         const homeScreen = document.getElementById('homeScreen');
         const countdownScreen = document.getElementById('countdownScreen');
@@ -1269,17 +1306,63 @@
 
         // ==================== INFO MODAL ====================
 
-        infoBtn.addEventListener('click', () => {
+        function showInfoModal() {
+            state.modalMode = 'info';
+            modalHeader.textContent = 'Hamilton Mode';
+            modalContent.innerHTML = `
+                <p><strong>The Philosophy</strong></p>
+                <p>Enjoy life normally. When it is time to work, enter Hamilton Mode. Drive one perfect lap. Return to life.</p>
+                <p style="margin-top: 16px;"><strong>The Rules</strong></p>
+                <ul style="margin-left: 16px; margin-top: 8px;">
+                    <li>One session: 15–30 minutes</li>
+                    <li>Maximum 2:30 per day</li>
+                    <li>Garage closes at 21:30</li>
+                    <li>Every lap counts</li>
+                </ul>
+                <p style="margin-top: 16px;"><strong>Drive with focus. Drive with purpose.</strong></p>
+            `;
+            modalActions.innerHTML = '';
             modalOverlay.classList.add('active');
+        }
+
+        function showConfirmation(title, message, onConfirm, onCancel = null) {
+            state.modalMode = 'confirmation';
+            modalHeader.textContent = title;
+            modalHeader.classList.add('confirmation-modal-title');
+            modalContent.innerHTML = `<p>${message}</p>`;
+            modalActions.innerHTML = `
+                <button class="button button-danger" id="confirmBtn">Confirm</button>
+                <button class="button button-secondary" id="cancelBtn">Cancel</button>
+            `;
+
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                onConfirm();
+                modalOverlay.classList.remove('active');
+                modalHeader.classList.remove('confirmation-modal-title');
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', () => {
+                if (onCancel) onCancel();
+                modalOverlay.classList.remove('active');
+                modalHeader.classList.remove('confirmation-modal-title');
+            });
+
+            modalOverlay.classList.add('active');
+        }
+
+        infoBtn.addEventListener('click', () => {
+            showInfoModal();
         });
 
         modalClose.addEventListener('click', () => {
             modalOverlay.classList.remove('active');
+            modalHeader.classList.remove('confirmation-modal-title');
         });
 
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) {
                 modalOverlay.classList.remove('active');
+                modalHeader.classList.remove('confirmation-modal-title');
             }
         });
 
@@ -1597,7 +1680,7 @@
             noLapsMessage.style.display = 'none';
 
             const sortedLaps = [...state.lapHistory].reverse();
-            sortedLaps.forEach(lap => {
+            sortedLaps.forEach((lap, index) => {
                 const lapMinutes = Math.floor(lap.time / 60);
                 const lapSeconds = lap.time % 60;
                 const timeFormatted = `${lapMinutes}:${lapSeconds.toString().padStart(2, '0')}`;
@@ -1609,10 +1692,35 @@
                         <p class="history-lap-num">Lap ${lap.lapNumber}</p>
                         <p class="history-mission">${lap.mission || 'No mission'}</p>
                     </div>
-                    <p class="history-time">${timeFormatted}</p>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <p class="history-time">${timeFormatted}</p>
+                        <button class="history-delete-btn" data-lap-index="${state.lapHistory.length - 1 - index}">✕</button>
+                    </div>
                 `;
                 historyList.appendChild(item);
             });
+
+            // Attach delete handlers
+            document.querySelectorAll('.history-delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const lapIndex = parseInt(e.target.dataset.lapIndex);
+                    const lap = state.lapHistory[lapIndex];
+                    showConfirmation(
+                        'Delete Lap',
+                        `Are you sure? This will delete Lap ${lap.lapNumber}.`,
+                        () => deleteLap(lapIndex)
+                    );
+                });
+            });
+        }
+
+        function deleteLap(index) {
+            const lap = state.lapHistory[index];
+            const lapTimeMinutes = Math.floor(lap.time / 60);
+            state.totalTimeToday -= (lapTimeMinutes + (lap.time % 60 > 0 ? 1 : 0));
+            state.lapHistory.splice(index, 1);
+            saveTodayData();
+            updateHomeScreen();
         }
 
         function updateStatistics() {
@@ -1707,12 +1815,12 @@
         layoutActionBar.className = 'layout-action-bar';
         layoutActionBar.innerHTML = `
             <button class="button button-primary" id="startSessionBtn">Start Qualifying Lap</button>
-            <button class="button button-secondary" id="endDayBtn">End Day</button>
+            <button class="button button-secondary" id="clearDayBtn">Clear Day</button>
         `;
         homeScreen.appendChild(layoutActionBar);
 
         const startSessionBtn = document.getElementById('startSessionBtn');
-        const endDayBtn = document.getElementById('endDayBtn');
+        const clearDayBtn = document.getElementById('clearDayBtn');
 
         startSessionBtn.addEventListener('click', () => {
             if (state.garageClosed) {
@@ -1721,10 +1829,20 @@
             showScreen('countdown');
         });
 
-        endDayBtn.addEventListener('click', () => {
-            state.garageClosed = true;
-            saveTodayData();
-            showScreen('garageClosed');
+        clearDayBtn.addEventListener('click', () => {
+            showConfirmation(
+                'Clear Day',
+                'Delete all laps and reset today\'s data? This cannot be undone.',
+                () => {
+                    state.lapHistory = [];
+                    state.totalTimeToday = 0;
+                    state.currentMission = '';
+                    state.garageClosed = false;
+                    localStorage.setItem('hamiltonMode_mission', '');
+                    saveTodayData();
+                    updateHomeScreen();
+                }
+            );
         });
 
         // ==================== FINISH LAP BUTTON ====================
@@ -1764,12 +1882,32 @@
         garageActionBar.className = 'layout-action-bar';
         garageActionBar.innerHTML = `
             <button class="button button-secondary" id="garageViewStats">View Today's Stats</button>
+            <button class="button button-danger" id="garageClearDay">Clear Day</button>
         `;
         garageClosedScreen.appendChild(garageActionBar);
 
         const garageViewStats = document.getElementById('garageViewStats');
+        const garageClearDay = document.getElementById('garageClearDay');
+
         garageViewStats.addEventListener('click', () => {
+            state.garageClosed = false;
             showScreen('home');
+        });
+
+        garageClearDay.addEventListener('click', () => {
+            showConfirmation(
+                'Clear Day',
+                'Delete all laps and reset today\'s data? This cannot be undone.',
+                () => {
+                    state.lapHistory = [];
+                    state.totalTimeToday = 0;
+                    state.currentMission = '';
+                    state.garageClosed = false;
+                    localStorage.setItem('hamiltonMode_mission', '');
+                    saveTodayData();
+                    showScreen('home');
+                }
+            );
         });
 
         // ==================== INITIALIZATION ====================
